@@ -1,68 +1,102 @@
 $(document).ready(function(){
-    var z = 7; //variable to keep track of the list length in minMax and display
-    var x = 0; //offset value to start for loops at in order to skip from one day to another in the 'days' list
-    var i = 0;
+    var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow'
 
     //function to request the api data
     var city = "adelaide"; //replace with geolocation API
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
-    var queryURL = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey;
-
+   
     $.ajax({
-        url: queryURL,
+        url: "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey, //current weather
         METHOD: "GET"
     }).then(function(response){
         console.log(response);
 
+        currentWeather(response);
+        
+        var long = response.coord.lon;
+        var lat = response.coord.lat;
+
+        $.ajax({
+            url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lat+"&lon="+long+"&cnt=1", //UV index
+            METHOD: "GET"
+        }).then(function(response){
+            console.log(response);
+            uvDisplay(response);
+        })
+    })
+
+    $.ajax({
+        url: "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey, //5 day forecast
+        METHOD: "GET"
+    }).then(function(response){
+        displayWeather(response);
+    })
+
+    //function to display the uv index
+    function uvDisplay(response) {
+        var uvIndex = $("<p>");
+        var value = response[0].value;
+
+        uvIndex.text("UV index: "+value);
+
+        $("#day0").append(uvIndex);
+    }
+
+    //function to display the current weather
+    function currentWeather(response) {
         //Displaying the city name and the current date in the title
-        var city = $("<h1>").text(response.city.name);
+        var city = $("<h1>").text(response.name);
         var date = $("<h1>").text(moment().format('MMMM Do YYYY'));
 
         $(".cityName").append(city);
         $(".cityDate").append(date);
 
-        displayWeather(response);
-        
-    })
+        var day = $("#day0");
 
-    function displayWeather(response){
+        var dayName = $("<h4>").text(moment().format("dddd"));
+        var temp = $("<p>").text("Temp: "+response.main.temp);
+        var weather = $("<p>").text("Weather: "+response.weather[0].main);
+        var description = $("<p>").text("Type: "+response.weather[0].description);
+        var humidity = $("<p>").text("Humidity: "+response.main.humidity+"%");
+        var windSpeed = $("<p>").text("Wind speed: "+response.wind.speed+"m/s");
+        var weatherPic = $("<img>").attr("src", pictureSort(response.weather[0].main));
+
+        dayName.attr("style", "color:white; text-align:center;");
+        
+        day.append(dayName);
+        day.append(weatherPic);
+        day.append(temp);
+        day.append(humidity);
+        day.append(windSpeed);
+        day.append(weather);
+        day.append(description);
+    }
+
+    //function to display to 5 day forecast
+    function displayWeather(response) {
         //for loop to cycle through the days
-        for(i, e=0; i<40; i+8, e++) {
-            //function to find the minimum/maximum temperature of the day as well as the rainfall for every 3 hour selection (api based)
-            function minMax() {
-                maxTempArray = [];
-                minTempArray = [];
-                for(x; x<z; x++) {
-                    maxTempArray.push(response.list[x].main.temp_max);  
-                    minTempArray.push(response.list[x].main.temp_min); 
-                       
-                }
-            }
-            minMax();
+        for(i, e=1; i<40; i+8, e++) {
+
+            var day = $("#day"+e);
 
             //Displaying the days and the conditions
-            var day = $("<h4>").text(daySort(e));
-            var maxTemp = $("<p>").text("Max Temp: "+Math.max(...maxTempArray));
-            var minTemp = $("<p>").text("Min Temp: "+Math.min(...minTempArray));
-            var weather = $("<p>").text("Weather: "+response.list[i+3].weather[0].main);
-            var humidity = $("<p>").text("Humidity: "+response.list[i+3].main.humidity+"%");
-            var windSpeed = $("<p>").text("Wind speed: "+response.list[i+3].wind.speed+"m/s");
-            var description = $("<p>").text("Type: "+response.list[i+3].weather[0].description);
+            var dayName = $("<h4>").text(daySort(e));
+            var temp = $("<p>").text("Temp: "+response.list[i].main.temp);
+            var weather = $("<p>").text("Weather: "+response.list[i].weather[0].main);
+            var humidity = $("<p>").text("Humidity: "+response.list[i].main.humidity+"%");
+            var description = $("<p>").text("Type: "+response.list[i].weather[0].description);
             //Find uv index
-            var weatherPic = $("<img>").attr("src", pictureSort(response.list[i+3].weather[0].main));
+            var weatherPic = $("<img>").attr("src", pictureSort(response.list[i].weather[0].main));
 
-            day.attr("style", "color:white; text-align:center;");
+            dayName.attr("style", "color:white; text-align:center;");
 
-            $("#day"+e).append(day);
-            $("#day"+e).append(weatherPic);
-            $("#day"+e).append(maxTemp);
-            $("#day"+e).append(minTemp);
-            $("#day"+e).append(humidity);
-            $("#day"+e).append(windSpeed);
-            $("#day"+e).append(weather);
-            $("#day"+e).append(description);  
+            day.append(dayName);
+            day.append(weatherPic);
+            day.append(temp);
+            day.append(humidity);
+            day.append(weather);
+            day.append(description);  
 
-            z=z+7;
             i=i+8;
         }
     }
