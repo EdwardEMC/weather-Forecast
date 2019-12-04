@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    var z = 8; //variable to keep track of the list length in minMax and display
+    var z = 7; //variable to keep track of the list length in minMax and display
     var x = 0; //offset value to start for loops at in order to skip from one day to another in the 'days' list
     var i = 0;
 
@@ -46,14 +46,15 @@ $(document).ready(function(){
             var minTemp = $("<p>").text("Min Temp: "+Math.min(...minTempArray));
             var weather = $("<p>").text("Weather: "+response.list[i+3].weather[0].main);
             var humidity = $("<p>").text("Humidity: "+response.list[i+3].main.humidity+"%");
-            var windSpeed=$("<p>").text("Wind speed: "+response.list[i+3].wind.speed+"m/s");
+            var windSpeed = $("<p>").text("Wind speed: "+response.list[i+3].wind.speed+"m/s");
             var description = $("<p>").text("Type: "+response.list[i+3].weather[0].description);
             //Find uv index
-            //Get photo depicting the weather
+            var weatherPic = $("<img>").attr("src", pictureSort(response.list[i+3].weather[0].main));
 
             day.attr("style", "color:white; text-align:center;");
 
             $("#day"+e).append(day);
+            $("#day"+e).append(weatherPic);
             $("#day"+e).append(maxTemp);
             $("#day"+e).append(minTemp);
             $("#day"+e).append(humidity);
@@ -61,7 +62,7 @@ $(document).ready(function(){
             $("#day"+e).append(weather);
             $("#day"+e).append(description);  
 
-            z=z+8;
+            z=z+7;
             i=i+8;
         }
     }
@@ -73,5 +74,21 @@ $(document).ready(function(){
             weekArray.push(moment(new Date()).add(d, "day").format("dddd"));
         }
         return weekArray[param];
+    }
+
+    //function to sort out which weather related picture to display
+    function pictureSort(weather){
+        if(weather==="Clear") {
+            return "assets/images/sunny.png"
+        }
+        else if(weather==="Storms") {
+            return "assets/images/stormy.png"
+        }
+        else if(weather==="Rain") {
+            return "assets/images/rainy.png"
+        }
+        else {
+            return "assets/images/cloudy.png"
+        }
     }
 })
