@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Weather Forecast</title>
+
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script type="text/javaScript" src="assets/js/jquery-3.4.1.js"></script>
+    <script type="text/javaScript" src="assets/js/moment.js"></script>
+    <script type="text/javaScript" src="assets/js/script.js"></script>
+
+</head>
+<body>
+    <div class="wrapper">
+        <div class="weather-display container border">
+            <div class="row text-center border name-date-display">
+                <div class="col-sm-6 cityName">
+                    <!--Area to display the city name-->
+                </div>
+                <div class="col-sm-6 cityDate">
+                    <!--Area to display the date-->
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="citySearch">
+                    <input type="search" id="search">
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div class="pastSearches">
+                <!--Area to display past searches as buttons-->    
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="row">
+                    <div class="border columncolor" id="day0">
+                        <!--Area to display the current day's (day 0) forecast-->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2 border columncolor" id="day1">
+                        <!--day 1-->
+                    </div>
+                    <div class="col-sm-2 border columncolor" id="day2">
+                        <!--day 2-->
+                    </div>
+                    <div class="col-sm-2 border columncolor" id="day3">
+                        <!--day 3-->
+                    </div>
+                    <div class="col-sm-2 border columncolor" id="day4">
+                        <!--day 4-->
+                    </div>
+                    <div class="col-sm-2 border columncolor" id="day5">
+                        <!--kept blank intentionally-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
