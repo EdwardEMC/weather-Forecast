@@ -29,16 +29,21 @@ $(document).ready(function(){
         url: "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey, //5 day forecast
         METHOD: "GET"
     }).then(function(response){
+        console.log(response);
         displayWeather(response);
     })
+
+    //listener event for the search button
 
     //function to display the uv index
     function uvDisplay(response) {
         var uvIndex = $("<p>");
-        var value = response[0].value;
+        var value = $("<p>").text(response[0].value);
 
-        uvIndex.text("UV index: "+value);
+        value.attr("class", "badge badge-danger");
+        uvIndex.text("UV index: ");
 
+        uvIndex.append(value);
         $("#day0").append(uvIndex);
     }
 
@@ -53,7 +58,7 @@ $(document).ready(function(){
 
         var day = $("#day0");
 
-        var dayName = $("<h4>").text(moment().format("dddd"));
+        var dayName = $("<h3>").text(moment().format("dddd"));
         var temp = $("<p>").text("Temp: "+response.main.temp);
         var weather = $("<p>").text("Weather: "+response.weather[0].main);
         var description = $("<p>").text("Type: "+response.weather[0].description);
@@ -61,7 +66,7 @@ $(document).ready(function(){
         var windSpeed = $("<p>").text("Wind speed: "+response.wind.speed+"m/s");
         var weatherPic = $("<img>").attr("src", pictureSort(response.weather[0].main));
 
-        dayName.attr("style", "color:white; text-align:center;");
+        dayName.attr("style", "color:black; text-align:center;");
         
         day.append(dayName);
         day.append(weatherPic);
@@ -84,18 +89,15 @@ $(document).ready(function(){
             var temp = $("<p>").text("Temp: "+response.list[i].main.temp);
             var weather = $("<p>").text("Weather: "+response.list[i].weather[0].main);
             var humidity = $("<p>").text("Humidity: "+response.list[i].main.humidity+"%");
-            var description = $("<p>").text("Type: "+response.list[i].weather[0].description);
-            //Find uv index
             var weatherPic = $("<img>").attr("src", pictureSort(response.list[i].weather[0].main));
 
-            dayName.attr("style", "color:white; text-align:center;");
+            dayName.attr("style", "color:black; text-align:center;");
 
             day.append(dayName);
             day.append(weatherPic);
             day.append(temp);
             day.append(humidity);
-            day.append(weather);
-            day.append(description);  
+            day.append(weather);  
 
             i=i+8;
         }
