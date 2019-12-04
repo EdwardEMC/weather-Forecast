@@ -2,11 +2,11 @@ $(document).ready(function(){
     var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow'
 
     //function to request the api data
-    var city = "adelaide"; //replace with geolocation API
+    var currentCity = "adelaide"; //replace with geolocation API
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
    
     $.ajax({
-        url: "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey, //current weather
+        url: "https://api.openweathermap.org/data/2.5/weather?q="+currentCity+"&units=metric&appid="+APIKey, //current weather
         METHOD: "GET"
     }).then(function(response){
         console.log(response);
@@ -26,7 +26,7 @@ $(document).ready(function(){
     })
 
     $.ajax({
-        url: "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey, //5 day forecast
+        url: "https://api.openweathermap.org/data/2.5/forecast?q="+currentCity+"&units=metric&appid="+APIKey, //5 day forecast
         METHOD: "GET"
     }).then(function(response){
         console.log(response);
@@ -34,6 +34,51 @@ $(document).ready(function(){
     })
 
     //listener event for the search button
+    $("#searchBtn").on("click", function(){
+        event.preventDefault();
+        i=7;
+        //empty the title columns
+        $(".cityName").empty();
+        $(".cityDate").empty();
+        //empty each day
+        $("#day0").html("");
+        $("#day1").html("");
+        $("#day2").html("");
+        $("#day3").html("");
+        $("#day4").html("");
+        $("#day5").html("");
+        
+        var city = $("#search").val().trim();
+
+        $.ajax({
+            url: "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey, //current weather
+            METHOD: "GET"
+        }).then(function(response){
+            console.log(response);
+    
+            currentWeather(response);
+            
+            var long = response.coord.lon;
+            var lat = response.coord.lat;
+    
+            $.ajax({
+                url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lat+"&lon="+long+"&cnt=1", //UV index
+                METHOD: "GET"
+            }).then(function(response){
+                console.log(response);
+                uvDisplay(response);
+            })
+        })
+    
+        $.ajax({
+            url: "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey, //5 day forecast
+            METHOD: "GET"
+        }).then(function(response){
+            console.log(response);
+            displayWeather(response);
+        })
+        
+    })
 
     //function to display the uv index
     function uvDisplay(response) {
@@ -122,6 +167,12 @@ $(document).ready(function(){
         }
         else if(weather==="Rain") {
             return "assets/images/rainy.png"
+        }
+        else if(weather==="Windy") {
+            return "assets/images/windy.png"
+        }
+        else if(weather==="Snow") {
+            return "assets/images/snowy.png"
         }
         else {
             return "assets/images/cloudy.png"
