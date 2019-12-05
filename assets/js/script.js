@@ -222,14 +222,14 @@ $(document).ready(function(){
     }
 
     //function to create past search buttons
-        function buttonCreation(y, city) {
-            var button = $("<button>").val(city);
-            button.text(city);
-            button.addClass("btn btn-info");
-            button.attr("id", y);
-            button.attr("style", "margin-top:5px; width:100%;");
-            $(".pastSearches").append(button);
-        }
+    function buttonCreation(y, city) {
+        var button = $("<button>").val(city);
+        button.text(city);
+        button.addClass("btn btn-info");
+        button.attr("id", y);
+        button.attr("style", "margin-top:5px; width:100%;");
+        $(".pastSearches").append(button);
+    }
 
     //listener event for the search button
     $("#searchBtn").on("click", function(){
@@ -252,4 +252,8 @@ $(document).ready(function(){
     })
 
     //listener to clear the past searches----------------------------------------------
+    $(".clearButton").on("click", function(){
+        localStorage.clear();
+        location.reload();
+    })
 })

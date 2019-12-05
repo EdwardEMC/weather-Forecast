@@ -12,8 +12,17 @@
     color: white;
 }
 
-.citySearch {
-    float: right;
+#searchBtn {
+    margin: 5px 0 5px 0;
+    width: 100%;
+}
+
+.input { /*Change this, currently not working*/
+    size: 100%;
+}
+
+.clearButton {
+    margin-top: 5px;
 }
 
 .border {
