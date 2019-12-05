@@ -1,24 +1,28 @@
 $(document).ready(function(){
     var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow'
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
-    var tracker  = parseInt(localStorage.getItem("tracker"));
+    var tracker = parseInt(localStorage.getItem("tracker"));
     var y;
-    var lat;
-    var lon;
+    var lat = "";
+    var lon = "";
+    var city = localStorage.getItem(tracker-1);
 
     checkStorage();
     loadSaved();
-    locationFind();
+    locationFind(); //finds the users geolocation and uses that to display initial landing page information
 
-    //function to find the current location of the user
+    //function to find the current location of the user and if denied location access opens the last searched location
     function locationFind() {
         navigator.geolocation.getCurrentPosition(function(position){
-            lon = Math.round(position.coords.longitude);
-            lat = Math.round(position.coords.latitude);
-            console.log(lon);
-            console.log(lat);
-            var queryURL = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //current weather
+            lon = position.coords.longitude;
+            lat = position.coords.latitude; 
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //weather
             var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //forecast
+            requests(queryURL, queryURLF);  
+        }, 
+        function(){ //if location access is denied
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
+            var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
             requests(queryURL, queryURLF);
         })
     }
@@ -217,7 +221,7 @@ $(document).ready(function(){
     $("#searchBtn").on("click", function(){
         event.preventDefault();
         var city = $("#search").val().trim();
-        //Add if condition to see if the city is real/if it is already on the list-----------------
+        //Add if condition to see if the city is real/if it is already on the list----------------------------------------
         citySearch(city);
 
         buttonCreation(y, city);
