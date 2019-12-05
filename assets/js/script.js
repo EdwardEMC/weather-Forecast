@@ -253,7 +253,9 @@ $(document).ready(function(){
 
     //listener to clear the past searches----------------------------------------------
     $(".clearButton").on("click", function(){
-        localStorage.clear();
-        location.reload();
+        if(confirm("This will delete all previous search history")) {
+            localStorage.clear();
+            location.reload();
+        }
     })
 })

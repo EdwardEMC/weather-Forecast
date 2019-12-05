@@ -3,8 +3,11 @@
     margin: 0 auto;
 }
 
-.weather-display {
-    margin-top: 25px;
+#dashboard {
+    margin-top: 10px;
+    text-align: center;
+    background-color: black;
+    color: white;
 }
 
 .name-date-display {
@@ -17,12 +20,12 @@
     width: 100%;
 }
 
-.input { /*Change this, currently not working*/
-    size: 100%;
+#search {
+    width: 100%;
 }
 
 .clearButton {
-    margin-top: 5px;
+    margin: 5px 0 5px 0;
 }
 
 .border {
