@@ -1,36 +1,40 @@
 $(document).ready(function(){
-    var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow'
+    var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow' (3hr info blocks, 7 blocks a day)
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker = parseInt(localStorage.getItem("tracker"));
-    var y;
-    var lat = "";
-    var lon = "";
-    var city = localStorage.getItem(tracker-1);
+    var y; //id marker for buttons
 
-    checkStorage();
-    loadSaved();
+    checkStorage(); //checks to see if anything is in the local storage
+    loadSaved(); //loads saved searches as buttons
     locationFind(); //finds the users geolocation and uses that to display initial landing page information
 
     //function to find the current location of the user and if denied location access opens the last searched location
     function locationFind() {
         navigator.geolocation.getCurrentPosition(function(position){
             lon = position.coords.longitude;
-            lat = position.coords.latitude; 
-            var queryURL = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //weather
+            lat = position.coords.latitude;
+            var queryURLW = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //weather
             var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //forecast
-            requests(queryURL, queryURLF);  
+            requests(queryURLW, queryURLF);  
         }, 
-        function(){ //if location access is denied
-            var queryURL = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
+        function(){ //if location access is denied, loads default adelaide if there has been no previous searches
+            if(localStorage.getItem("tracker")===null) {
+                city = "adelaide"; 
+            }  
+            else {
+                city = localStorage.getItem(tracker-1); //last known search value
+            }
+
+            var queryURLW = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
             var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
-            requests(queryURL, queryURLF);
+            requests(queryURLW, queryURLF);
         })
     }
 
     //loading the current city on page opening
-    function requests(queryURL, queryURLF){
+    function requests(queryURLW, queryURLF){
         $.ajax({
-            url: queryURL, //current weather
+            url: queryURLW, //current weather
             METHOD: "GET"
         }).then(function(response){
             console.log(response);
@@ -71,9 +75,9 @@ $(document).ready(function(){
         $("#day4").html("");
         $("#day5").html("");
 
-        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
+        var queryURLW = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
         var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
-        requests(queryURL, queryURLF);
+        requests(queryURLW, queryURLF);
     }
 
     //loading any previous searches on document load
