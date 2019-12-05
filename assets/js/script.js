@@ -3,21 +3,30 @@ $(document).ready(function(){
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker  = parseInt(localStorage.getItem("tracker"));
     var y;
-    var city = "adelaide"; //replace with geolocation API
+    var lat;
+    var lon;
 
     checkStorage();
     loadSaved();
-    requests(city);
+    locationFind();
 
     //function to find the current location of the user
     function locationFind() {
-        //fill this in
+        navigator.geolocation.getCurrentPosition(function(position){
+            lon = Math.round(position.coords.longitude);
+            lat = Math.round(position.coords.latitude);
+            console.log(lon);
+            console.log(lat);
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //current weather
+            var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&units=metric&appid="+APIKey; //forecast
+            requests(queryURL, queryURLF);
+        })
     }
 
     //loading the current city on page opening
-    function requests(city){
+    function requests(queryURL, queryURLF){
         $.ajax({
-            url: "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey, //current weather
+            url: queryURL, //current weather
             METHOD: "GET"
         }).then(function(response){
             console.log(response);
@@ -25,10 +34,10 @@ $(document).ready(function(){
             currentWeather(response);
             
             var long = response.coord.lon;
-            var lat = response.coord.lat;
+            var lati = response.coord.lat;
 
             $.ajax({
-                url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lat+"&lon="+long+"&cnt=1", //UV index
+                url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
                 METHOD: "GET"
             }).then(function(response){
                 console.log(response);
@@ -37,7 +46,7 @@ $(document).ready(function(){
         })
 
         $.ajax({
-            url: "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey, //5 day forecast
+            url: queryURLF, //5 day forecast
             METHOD: "GET"
         }).then(function(response){
             console.log(response);
@@ -58,9 +67,11 @@ $(document).ready(function(){
         $("#day4").html("");
         $("#day5").html("");
 
-        requests(city);
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
+        var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
+        requests(queryURL, queryURLF);
     }
-    
+
     //loading any previous searches on document load
     function loadSaved(){   
         for(x=0; x<tracker; x++) { 
@@ -68,7 +79,7 @@ $(document).ready(function(){
             buttonCreation(y, city);
         }
     }
-    
+
     //function to set the Id of search buttons/check if theres saved searches/continue id naming from last saved
     function checkStorage(){ 
         if(tracker) {
