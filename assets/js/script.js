@@ -221,6 +221,16 @@ $(document).ready(function(){
         }
     }
 
+    //function to create past search buttons
+        function buttonCreation(y, city) {
+            var button = $("<button>").val(city);
+            button.text(city);
+            button.addClass("btn btn-info");
+            button.attr("id", y);
+            button.attr("style", "margin-top:5px; width:100%;");
+            $(".pastSearches").append(button);
+        }
+
     //listener event for the search button
     $("#searchBtn").on("click", function(){
         event.preventDefault();
@@ -234,20 +244,12 @@ $(document).ready(function(){
         localStorage.setItem("tracker", y); //saving the position of y as to continue making new button id's from where it left off
     })
 
-    //function to create past search buttons
-    function buttonCreation(y, city) {
-        var button = $("<button>").val(city);
-        button.text(city);
-        button.addClass("btn btn-info");
-        button.attr("id", y);
-        button.attr("style", "margin-top:5px; width:100%;");
-        $(".pastSearches").append(button);
-    }
-
     //listener to decide which past search was clicked
     $(".pastSearches").on("click", function(event){
         event.preventDefault();
         var city = event.target.value;
         citySearch(city);
     })
+
+    //listener to clear the past searches----------------------------------------------
 })
