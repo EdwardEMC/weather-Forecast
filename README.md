@@ -18,7 +18,7 @@ Searches are saved to the local storage and on a refresh or new page load any pr
 Bootstrap\
 Jquery\
 Moment.js\
-OpenWeather
+OpenWeatherMap
 
 # Authors 
 
