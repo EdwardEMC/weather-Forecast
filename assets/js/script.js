@@ -1,12 +1,40 @@
 $(document).ready(function(){
-     //Variable to offset the response list to skip to a new day, always starting with 'tomorrow' (3hr info blocks)
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker = parseInt(localStorage.getItem("tracker"));
-    var y = findY(); //id marker for buttons
+    // var y = findY(); //id marker for buttons
     
     checkStorage(); //checks to see if anything is in the local storage
     loadSaved(); //loads saved searches as buttons
     locationFind(); //finds the users geolocation and uses that to display initial landing page information
+    
+        
+    //function to set y and see if there is a saved value
+    // function findY() {
+    //     if(localStorage.getItem("tracker")===null) {
+    //         return 0; 
+    //     }  
+    //     else {
+    //         return tracker;
+    //     }
+    // }
+
+    //function to set the Id of search buttons/check if theres saved searches/continue id naming from last saved
+    function checkStorage(){ 
+        if(tracker) {
+            y = tracker;
+        } 
+        else {
+            y = 0;
+        }
+    }
+
+    //loading any previous searches on document load
+    function loadSaved(){   
+        for(x=0; x<tracker; x++) { 
+            var city = localStorage.getItem(x);
+            buttonCreation(x, city);
+        }
+    }
 
     //function to find the current location
     function locationFind() {
@@ -61,63 +89,17 @@ $(document).ready(function(){
 
                 //Adding in functions to check if the ajax failed
                 }).fail(function(){
-                    alert("Ajax request failed, city doesn't not exist or check the spelling");
+                    $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
                     return;
                 });
             }).fail(function(){
-                alert("Ajax request failed, city doesn't not exist or check the spelling");
+                $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
                 return;
             });
         }).fail(function(){
-            alert("Ajax request failed, city doesn't not exist or check the spelling");
+            $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
             return;
         });
-    }
-
-    //function to search the cities
-    function citySearch(city) {
-        //emptying individually as they are dynamically created (can just create the columns dynamically next time to reduce)
-        $(".cityName").empty();
-        $(".cityDate").empty();
-        $("#day0").html("");
-        $("#day1").html("");
-        $("#day2").html("");
-        $("#day3").html("");
-        $("#day4").html("");
-        $("#day5").html("");
-
-        var queryURLW = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
-        var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
-        requests(queryURLW, queryURLF);
-    }
-
-    //loading any previous searches on document load
-    function loadSaved(){   
-        for(x=0; x<tracker; x++) { 
-            var city = localStorage.getItem(x);
-            buttonCreation(x, city);
-        }
-    }
-
-    //function to set the Id of search buttons/check if theres saved searches/continue id naming from last saved
-    function checkStorage(){ 
-        if(tracker) {
-            y = tracker;
-        } 
-        else {
-            y = 0;
-        }
-    }
-
-    //function to display the uv index
-    function uvDisplay(response) {
-        var uvIndex = $("<p>").text("UV index: ");
-        var value = $("<p>").text(response[0].value);
-
-        value.attr("class", "badge badge-danger");
-
-        uvIndex.append(value);
-        $("#day0").append(uvIndex);
     }
 
     //function to display the current weather
@@ -131,7 +113,7 @@ $(document).ready(function(){
         $(".cityDate").append(date);
 
         var dayName = $("<h3>").text(moment().format("dddd"));
-        var temp = $("<p>").text("Temp: "+response.main.temp);
+        var temp = $("<p>").text("Temp: "+response.main.temp+"\xB0C");
         var weather = $("<p>").text("Weather: "+response.weather[0].main);
         var description = $("<p>").text("Type: "+response.weather[0].description);
         var humidity = $("<p>").text("Humidity: "+response.main.humidity+"%");
@@ -149,6 +131,17 @@ $(document).ready(function(){
         day.append(description);
     }
 
+    //function to display the uv index
+    function uvDisplay(response) {
+        var uvIndex = $("<p>").text("UV index: ");
+        var value = $("<p>").text(response[0].value);
+
+        value.attr("class", "badge badge-danger");
+
+        uvIndex.append(value);
+        $("#day0").append(uvIndex);
+    }
+    
     //function to display to 5 day forecast
     function displayWeather(response) {
         //for loop to cycle through the days
@@ -160,7 +153,7 @@ $(document).ready(function(){
             
             //Displaying the days and the conditions
             var dayName = $("<h4>").text(daySort(e));
-            var temp = $("<p>").text("Temp: "+maxTemp(i, response));
+            var temp = $("<p>").text("Temp: "+maxTemp(i, response)+"\xB0C");
             var weather = $("<p>").text("Weather: "+response.list[i].weather[0].main);
             var humidity = $("<p>").text("Humidity: "+averageHum(i, response)+"%");
             var weatherPic = $("<img>").attr("src", pictureSort(response.list[i].weather[0].main));
@@ -175,7 +168,7 @@ $(document).ready(function(){
             i=i+8; //As the forecast is in 3 hour intervals, this skips from one day to the next
         }
     }
-
+    
     //function allowing for time chnages to the 3hr blocks time stamp (updates)
     function timeRead(response) {
         var time = response.list[0]["dt_txt"];
@@ -183,6 +176,64 @@ $(document).ready(function(){
         return Math.floor(((24-parseInt(hour))/3));
     }
 
+    //function to detect if ajax has passed and if so create buttons (checks if citeis are real)
+    function ajaxPassed(city) {
+        //Add condition to see if the city is real/if it is already on the list----------------------------------------
+        var alreadyButtons = [];
+
+        for(x=0; x<y; x++) {
+            alreadyButtons.push($("#"+x).val());
+        }
+        
+        if(!alreadyButtons.includes(city)) {
+            buttonCreation(y, city);
+            localStorage.setItem(y, city);   
+            y=y+1;
+            localStorage.setItem("tracker", y); //saving the position of y as to continue making new button id's from where it left off
+        }
+    }
+
+    //function to create past search buttons
+    function buttonCreation(y, city) {
+        var button = $("<button>").val(city);
+        button.text(city);
+        button.addClass("btn btn-info");
+        button.attr("id", y);
+        button.attr("style", "margin-top:5px; width:100%;");
+        $(".pastSearches").prepend(button);
+    }
+    
+    //function to sort out which weather related picture to display
+    function pictureSort(weather){
+        if(weather==="Clear") {
+            return "assets/images/sunny.png"
+        }
+        else if(weather==="Storms") {
+            return "assets/images/stormy.png"
+        }
+        else if(weather==="Rain") {
+            return "assets/images/rainy.png"
+        }
+        else if(weather==="Windy") {
+            return "assets/images/windy.png"
+        }
+        else if(weather==="Snow") {
+            return "assets/images/snowy.png"
+        }
+        else {
+            return "assets/images/cloudy.png"
+        }
+    }
+               
+    //function to display the current days
+    function daySort(param){
+        var weekArray = [];
+        for(d=0; d<7; d++) {
+            weekArray.push(moment(new Date()).add(d, "day").format("dddd"));
+        }
+        return weekArray[param];
+    }
+    
     //function to display the maximum temperature
     function maxTemp(i, response) {
         var maxT = [];
@@ -208,73 +259,22 @@ $(document).ready(function(){
         }
         return Math.floor(total/avgH.length);
     }
-    
-    //function to display the current days
-    function daySort(param){
-        var weekArray = [];
-        for(d=0; d<7; d++) {
-            weekArray.push(moment(new Date()).add(d, "day").format("dddd"));
-        }
-        return weekArray[param];
-    }
 
-    //function to sort out which weather related picture to display
-    function pictureSort(weather){
-        if(weather==="Clear") {
-            return "assets/images/sunny.png"
-        }
-        else if(weather==="Storms") {
-            return "assets/images/stormy.png"
-        }
-        else if(weather==="Rain") {
-            return "assets/images/rainy.png"
-        }
-        else if(weather==="Windy") {
-            return "assets/images/windy.png"
-        }
-        else if(weather==="Snow") {
-            return "assets/images/snowy.png"
-        }
-        else {
-            return "assets/images/cloudy.png"
-        }
-    }
+    //function to search the cities
+    function citySearch(city) {
+        //emptying individually as they are dynamically created (can just create the columns dynamically next time to reduce)
+        $(".cityName").empty();
+        $(".cityDate").empty();
+        $("#day0").html("");
+        $("#day1").html("");
+        $("#day2").html("");
+        $("#day3").html("");
+        $("#day4").html("");
+        $("#day5").html("");
 
-    //function to create past search buttons
-    function buttonCreation(y, city) {
-        var button = $("<button>").val(city);
-        button.text(city);
-        button.addClass("btn btn-info");
-        button.attr("id", y);
-        button.attr("style", "margin-top:5px; width:100%;");
-        $(".pastSearches").append(button);
-    }
-
-    //function to detect if ajax has passed and if so create buttons (checks if citeis are real)
-    function ajaxPassed(city) {
-        //Add condition to see if the city is real/if it is already on the list----------------------------------------
-        var alreadyButtons = [];
-
-        for(x=0; x<y; x++) {
-            alreadyButtons.push($("#"+x).val());
-        }
-        
-        if(!alreadyButtons.includes(city)) {
-            buttonCreation(y, city);
-            localStorage.setItem(y, city);   
-            y=y+1;
-            localStorage.setItem("tracker", y); //saving the position of y as to continue making new button id's from where it left off
-        }
-    }
-    
-    //function to set y and see if there is a saved value
-    function findY() {
-        if(localStorage.getItem("tracker")===null) {
-            return 0; 
-        }  
-        else {
-            return tracker;
-        }
+        var queryURLW = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
+        var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
+        requests(queryURLW, queryURLF);
     }
 
     //listener event for the search button
@@ -284,6 +284,13 @@ $(document).ready(function(){
         
         if(city) {
             citySearch(city);
+        }
+    });
+
+    //searching on enter press
+    $("#search").keypress(function(e) {
+        if(e.which == 13) {
+            $("#searchBtn").click();
         }
     });
 
