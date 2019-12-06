@@ -1,14 +1,14 @@
 $(document).ready(function(){
-    var i = 7; //Variable to offset the response list to skip to a new day, always starting with 'tomorrow' (3hr info blocks, 7 blocks a day)
+     //Variable to offset the response list to skip to a new day, always starting with 'tomorrow' (3hr info blocks)
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker = parseInt(localStorage.getItem("tracker"));
-    var y; //id marker for buttons
-
+    var y = findY(); //id marker for buttons
+    console.log(y);
     checkStorage(); //checks to see if anything is in the local storage
     loadSaved(); //loads saved searches as buttons
     locationFind(); //finds the users geolocation and uses that to display initial landing page information
 
-    //function to find the current location of the user and if denied location access opens the last searched location
+    //function to find the current location
     function locationFind() {
         navigator.geolocation.getCurrentPosition(function(position){
             lon = position.coords.longitude;
@@ -33,12 +33,12 @@ $(document).ready(function(){
 
     //loading the current city on page opening
     function requests(queryURLW, queryURLF){
+        
         $.ajax({
             url: queryURLW, //current weather
             METHOD: "GET"
-        }).then(function(response){
+        }).done(function(response){
             console.log(response);
-
             currentWeather(response);
             
             var long = response.coord.lon;
@@ -47,24 +47,35 @@ $(document).ready(function(){
             $.ajax({
                 url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
                 METHOD: "GET"
-            }).then(function(response){
+            }).done(function(response){
                 console.log(response);
                 uvDisplay(response);
-            })
-        })
+                
+                $.ajax({
+                    url: queryURLF, //5 day forecast
+                    METHOD: "GET"
+                }).done(function(response){
+                    console.log(response);
+                    displayWeather(response);
+                    ajaxPassed(response.city.name);
 
-        $.ajax({
-            url: queryURLF, //5 day forecast
-            METHOD: "GET"
-        }).then(function(response){
-            console.log(response);
-            displayWeather(response);
-        })
+                //Adding in functions to check if the ajax failed
+                }).fail(function(){
+                    alert("Ajax request failed, city doesn't not exist or check the spelling");
+                    return;
+                });
+            }).fail(function(){
+                alert("Ajax request failed, city doesn't not exist or check the spelling");
+                return;
+            });
+        }).fail(function(){
+            alert("Ajax request failed, city doesn't not exist or check the spelling");
+            return;
+        });
     }
 
     //function to search the cities
     function citySearch(city) {
-        i=7;
         //emptying individually as they are dynamically created (can just create the columns dynamically next time to reduce)
         $(".cityName").empty();
         $(".cityDate").empty();
@@ -84,7 +95,7 @@ $(document).ready(function(){
     function loadSaved(){   
         for(x=0; x<tracker; x++) { 
             var city = localStorage.getItem(x);
-            buttonCreation(y, city);
+            buttonCreation(x, city);
         }
     }
 
@@ -141,6 +152,7 @@ $(document).ready(function(){
     //function to display to 5 day forecast
     function displayWeather(response) {
         //for loop to cycle through the days
+        i = timeRead(response);
         for(i, e=1; i<40; i+8, e++) { //'e' starting at 1 as to skip the 'current' day and post the following ones to the forecast area
 
             var day = $("#day"+e);
@@ -164,8 +176,15 @@ $(document).ready(function(){
         }
     }
 
+    //function allowing for time chnages to the 3hr blocks time stamp (updates)
+    function timeRead(response) {
+        var time = response.list[0]["dt_txt"];
+        var hour = time.charAt(12)+time.charAt(13);
+        return (24-parseInt(hour))/3;
+    }
+
     //function to display the maximum temperature
-    function maxTemp(i, response){
+    function maxTemp(i, response) {
         var maxT = [];
         for(x=0, z=i; x<8; z++, x++) {
             if(response.list[z]) { //checking if the location exists (last day only has one 3hr block)
@@ -231,31 +250,55 @@ $(document).ready(function(){
         $(".pastSearches").append(button);
     }
 
+    //function to detect if ajax has passed and if so create buttons (checks if citeis are real)
+    function ajaxPassed(city) {
+        //Add condition to see if the city is real/if it is already on the list----------------------------------------
+        var alreadyButtons = [];
+
+        for(x=0; x<y; x++) {
+            alreadyButtons.push($("#"+x).val());
+        }
+        
+        if(!alreadyButtons.includes(city)) {
+            buttonCreation(y, city);
+            localStorage.setItem(y, city);   
+            y=y+1;
+            localStorage.setItem("tracker", y); //saving the position of y as to continue making new button id's from where it left off
+        }
+    }
+    
+    //function to set y and see if there is a saved value
+    function findY() {
+        if(localStorage.getItem("tracker")===null) {
+            return 0; 
+        }  
+        else {
+            return tracker;
+        }
+    }
+
     //listener event for the search button
     $("#searchBtn").on("click", function(){
         event.preventDefault();
         var city = $("#search").val().trim();
-        //Add if condition to see if the city is real/if it is already on the list----------------------------------------
-        citySearch(city);
-
-        buttonCreation(y, city);
-        localStorage.setItem(y, city);   
-        y=y+1;
-        localStorage.setItem("tracker", y); //saving the position of y as to continue making new button id's from where it left off
-    })
+        
+        if(city) {
+            citySearch(city);
+        }
+    });
 
     //listener to decide which past search was clicked
     $(".pastSearches").on("click", function(event){
         event.preventDefault();
         var city = event.target.value;
         citySearch(city);
-    })
+    });
 
-    //listener to clear the past searches----------------------------------------------
+    //listener to clear the past searches
     $(".clearButton").on("click", function(){
         if(confirm("This will delete all previous search history")) {
             localStorage.clear();
             location.reload();
         }
-    })
-})
+    });
+});
