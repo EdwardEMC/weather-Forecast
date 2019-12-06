@@ -3,7 +3,7 @@ $(document).ready(function(){
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker = parseInt(localStorage.getItem("tracker"));
     var y = findY(); //id marker for buttons
-    console.log(y);
+    
     checkStorage(); //checks to see if anything is in the local storage
     loadSaved(); //loads saved searches as buttons
     locationFind(); //finds the users geolocation and uses that to display initial landing page information
@@ -153,17 +153,17 @@ $(document).ready(function(){
     function displayWeather(response) {
         //for loop to cycle through the days
         i = timeRead(response);
-        for(i, e=1; i<40; i+8, e++) { //'e' starting at 1 as to skip the 'current' day and post the following ones to the forecast area
+        console.log(i);
+        for(i = timeRead(response), e=1; i<40; i+8, e++) { //'e' starting at 1 as to skip the 'current' day and post the following ones to the forecast area
 
             var day = $("#day"+e);
-
+            
             //Displaying the days and the conditions
             var dayName = $("<h4>").text(daySort(e));
             var temp = $("<p>").text("Temp: "+maxTemp(i, response));
             var weather = $("<p>").text("Weather: "+response.list[i].weather[0].main);
             var humidity = $("<p>").text("Humidity: "+averageHum(i, response)+"%");
             var weatherPic = $("<img>").attr("src", pictureSort(response.list[i].weather[0].main));
-
             dayName.attr("style", "color:black; text-align:center;");
 
             day.append(dayName);
@@ -179,8 +179,8 @@ $(document).ready(function(){
     //function allowing for time chnages to the 3hr blocks time stamp (updates)
     function timeRead(response) {
         var time = response.list[0]["dt_txt"];
-        var hour = time.charAt(12)+time.charAt(13);
-        return (24-parseInt(hour))/3;
+        var hour = time.charAt(11)+time.charAt(12);
+        return Math.floor(((24-parseInt(hour))/3));
     }
 
     //function to display the maximum temperature
