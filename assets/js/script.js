@@ -1,22 +1,10 @@
 $(document).ready(function(){
     var APIKey = "f9443d1cf060b0a35d32964b1f1de721";
     var tracker = parseInt(localStorage.getItem("tracker"));
-    // var y = findY(); //id marker for buttons
-    
+
     checkStorage(); //checks to see if anything is in the local storage
     loadSaved(); //loads saved searches as buttons
     locationFind(); //finds the users geolocation and uses that to display initial landing page information
-    
-        
-    //function to set y and see if there is a saved value
-    // function findY() {
-    //     if(localStorage.getItem("tracker")===null) {
-    //         return 0; 
-    //     }  
-    //     else {
-    //         return tracker;
-    //     }
-    // }
 
     //function to set the Id of search buttons/check if theres saved searches/continue id naming from last saved
     function checkStorage(){ 
@@ -60,12 +48,12 @@ $(document).ready(function(){
     }
 
     //loading the current city on page opening
-    function requests(queryURLW, queryURLF){
+    function requests(queryURLW, queryURLF) {
         
         $.ajax({
             url: queryURLW, //current weather
             METHOD: "GET"
-        }).done(function(response){
+        }).done(function(response) {
             console.log(response);
             currentWeather(response);
             
@@ -75,28 +63,28 @@ $(document).ready(function(){
             $.ajax({
                 url: "https://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
                 METHOD: "GET"
-            }).done(function(response){
+            }).done(function(response) {
                 console.log(response);
                 uvDisplay(response);
                 
                 $.ajax({
                     url: queryURLF, //5 day forecast
                     METHOD: "GET"
-                }).done(function(response){
+                }).done(function(response) {
                     console.log(response);
                     displayWeather(response);
                     ajaxPassed(response.city.name);
 
-                //Adding in functions to check if the ajax failed
-                }).fail(function(){
+                //Adding in functions in case the ajax failed
+                }).fail(function() {
                     $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
                     return;
                 });
-            }).fail(function(){
+            }).fail(function() {
                 $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
                 return;
             });
-        }).fail(function(){
+        }).fail(function() {
             $("#day0").text("Ajax request failed, city doesn't exist or check the spelling");
             return;
         });
@@ -112,7 +100,7 @@ $(document).ready(function(){
         $(".cityName").append(city);
         $(".cityDate").append(date);
 
-        var dayName = $("<h3>").text(moment().format("dddd"));
+        var dayName = $("<h3>").text(moment().format("dddd DD/MM/YY"));
         var temp = $("<p>").text("Temp: "+response.main.temp+"\xB0C");
         var weather = $("<p>").text("Weather: "+response.weather[0].main);
         var description = $("<p>").text("Type: "+response.weather[0].description);
@@ -122,13 +110,7 @@ $(document).ready(function(){
 
         dayName.attr("style", "color:black; text-align:center;");
         
-        day.append(dayName);
-        day.append(weatherPic);
-        day.append(temp);
-        day.append(humidity);
-        day.append(windSpeed);
-        day.append(weather);
-        day.append(description);
+        day.append(dayName, weatherPic, temp, humidity, windSpeed, weather, description);
     }
 
     //function to display the uv index
@@ -144,10 +126,11 @@ $(document).ready(function(){
     
     //function to display to 5 day forecast
     function displayWeather(response) {
-        //for loop to cycle through the days
         i = timeRead(response);
-        console.log(i);
-        for(i = timeRead(response), e=1; i<40; i+8, e++) { //'e' starting at 1 as to skip the 'current' day and post the following ones to the forecast area
+
+        noData();
+        //for loop to cycle through the days
+        for(i, e=1; i<40; i+8, e++) { //'e' starting at 1 as to skip the 'current' day and post the following ones to the forecast area
 
             var day = $("#day"+e);
             
@@ -157,28 +140,36 @@ $(document).ready(function(){
             var weather = $("<p>").text("Weather: "+response.list[i].weather[0].main);
             var humidity = $("<p>").text("Humidity: "+averageHum(i, response)+"%");
             var weatherPic = $("<img>").attr("src", pictureSort(response.list[i].weather[0].main));
+            
             dayName.attr("style", "color:black; text-align:center;");
 
-            day.append(dayName);
-            day.append(weatherPic);
-            day.append(temp);
-            day.append(humidity);
-            day.append(weather);  
+            day.append(dayName, weatherPic, temp, humidity, weather); 
 
             i=i+8; //As the forecast is in 3 hour intervals, this skips from one day to the next
         }
     }
     
-    //function allowing for time chnages to the 3hr blocks time stamp (updates)
+    //function allowing for time changes to the 3hr block's time stamp
     function timeRead(response) {
         var time = response.list[0]["dt_txt"];
         var hour = time.charAt(11)+time.charAt(12);
         return Math.floor(((24-parseInt(hour))/3));
     }
 
-    //function to detect if ajax has passed and if so create buttons (checks if citeis are real)
+    //function for when i=8 (day 5 does not have any data points yet, only occurs when the first 3 hour block's time stamp is 00:00:00)
+    function noData() {
+        if(i=8) {
+            var na = $("#day5");
+            var header = $("<h4>").text(daySort(5));
+            na.text("Is currently not available, check back in a few hours once the forecast has updated.");
+            na.attr("style", "color:black; text-align:center;");
+            na.prepend(header);
+        }
+    }
+
+    //function to detect if ajax has passed and if so create buttons (checks if cities are real)
     function ajaxPassed(city) {
-        //Add condition to see if the city is real/if it is already on the list----------------------------------------
+        //Add condition to see if the city is real/if it is already on the list
         var alreadyButtons = [];
 
         for(x=0; x<y; x++) {
@@ -204,7 +195,7 @@ $(document).ready(function(){
     }
     
     //function to sort out which weather related picture to display
-    function pictureSort(weather){
+    function pictureSort(weather) {
         if(weather==="Clear") {
             return "assets/images/sunny.png"
         }
@@ -226,10 +217,10 @@ $(document).ready(function(){
     }
                
     //function to display the current days
-    function daySort(param){
+    function daySort(param) {
         var weekArray = [];
         for(d=0; d<7; d++) {
-            weekArray.push(moment(new Date()).add(d, "day").format("dddd"));
+            weekArray.push(moment(new Date()).add(d, "day").format("dddd DD/MM/YY"));
         }
         return weekArray[param];
     }
@@ -249,12 +240,12 @@ $(document).ready(function(){
     function averageHum(i, response) {
         var avgH = [];
         for(x=0, z=i; x<8; z++, x++) {
-            if(response.list[z]) { //checking if the location exists (last day only has one 3hr block)
+            if(response.list[z]) { //checking if the location exists (last day only has one 3hr block when i=7, none when i=8)
                 avgH.push(response.list[z].main.humidity);
             }
         }
         var total = 0;
-        for(x=0; x<avgH.length; x++){
+        for(x=0; x<avgH.length; x++) {
             total+=avgH[x];
         }
         return Math.floor(total/avgH.length);
@@ -265,12 +256,10 @@ $(document).ready(function(){
         //emptying individually as they are dynamically created (can just create the columns dynamically next time to reduce)
         $(".cityName").empty();
         $(".cityDate").empty();
-        $("#day0").html("");
-        $("#day1").html("");
-        $("#day2").html("");
-        $("#day3").html("");
-        $("#day4").html("");
-        $("#day5").html("");
+
+        for(p=0; p<6; p++) {
+            $("#day"+p).html("");
+        }
 
         var queryURLW = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+APIKey; //weather
         var queryURLF = "https://api.openweathermap.org/data/2.5/forecast?q="+city+"&units=metric&appid="+APIKey; //forecast
@@ -278,7 +267,7 @@ $(document).ready(function(){
     }
 
     //listener event for the search button
-    $("#searchBtn").on("click", function(){
+    $("#searchBtn").on("click", function() {
         event.preventDefault();
         var city = $("#search").val().trim();
         
@@ -287,7 +276,7 @@ $(document).ready(function(){
         }
     });
 
-    //searching on enter press
+    //listener for searching on enter press
     $("#search").keypress(function(e) {
         if(e.which == 13) {
             $("#searchBtn").click();
@@ -295,14 +284,14 @@ $(document).ready(function(){
     });
 
     //listener to decide which past search was clicked
-    $(".pastSearches").on("click", function(event){
+    $(".pastSearches").on("click", function(event) {
         event.preventDefault();
         var city = event.target.value;
         citySearch(city);
     });
 
     //listener to clear the past searches
-    $(".clearButton").on("click", function(){
+    $(".clearButton").on("click", function() {
         if(confirm("This will delete all previous search history")) {
             localStorage.clear();
             location.reload();
