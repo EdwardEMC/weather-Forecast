@@ -57,8 +57,8 @@ $(document).ready(function(){
             console.log(response);
             currentWeather(response);
             
-            var long = response.coord.lon;
-            var lati = response.coord.lat;
+            long = response.coord.lon;
+            lati = response.coord.lat;
 
             $.ajax({
                 url: "https://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
