@@ -158,7 +158,7 @@ $(document).ready(function(){
 
     //function for when i=8 (day 5 does not have any data points yet, only occurs when the first 3 hour block's time stamp is 00:00:00)
     function noData() {
-        if(i=8) {
+        if(i>7) {
             var na = $("#day5");
             var header = $("<h4>").text(daySort(5));
             na.text("Is currently not available, check back in a few hours once the forecast has updated.");
