@@ -3,7 +3,7 @@ A simple weather forecast that presents the user with the current weather and a 
 
 ![Landing Page](/assets/images/screenShots/landingPage.jpg?raw=true "landingPage")
 
-The user is first asked for access to their location data and will be on any refresh, if accepted the landing page will link to the user's current city and add a button of that city to the previous search area, if denied it will load the last known search or the default of Adelaide if no previous searches have been made.
+The user is first asked for access to their location data, if accepted the landing page will link to the user's current city and add a button of that city to the previous search area, if denied it will load the last known search or the default of Adelaide if no previous searches have been made.
 
 ![Location](/assets/images/screenShots/location.jpg?raw=true "location") 
 
