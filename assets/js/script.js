@@ -45,7 +45,7 @@ $(document).ready(function(){
             var lati = response.coord.lat;
 
             $.ajax({
-                url: "http://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
+                url: "https://api.openweathermap.org/data/2.5/uvi/forecast?appid="+APIKey+"&lat="+lati+"&lon="+long+"&cnt=2", //UV index
                 METHOD: "GET"
             }).done(function(response){
                 console.log(response);
